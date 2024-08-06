@@ -3,29 +3,58 @@ document.getElementById('calculator-form').addEventListener('submit', function(e
     calculateLiquidationPrice();
 });
 
-document.getElementById('additionalCheckbox').addEventListener('change', function() {
-    const additionalFields = document.getElementById('additionalFields');
-    additionalFields.style.display = this.checked ? 'block' : 'none';
+document.getElementById('addTradeButton').addEventListener('click', function() {
+    addTradeFields();
 });
 
-document.querySelectorAll('#calculator-form input').forEach(input => {
+document.querySelectorAll('#calculator-form input, #calculator-form select').forEach(input => {
     input.addEventListener('input', calculateLiquidationPrice);
 });
+
+function addTradeFields() {
+    const additionalTrades = document.getElementById('additionalTrades');
+    const tradeIndex = additionalTrades.children.length;
+
+    const tradeDiv = document.createElement('div');
+    tradeDiv.className = 'additional-trade';
+    tradeDiv.innerHTML = `
+        <h3>Trade ${tradeIndex + 1}</h3>
+        <div class="form-group">
+            <label for="additionalEntryPrice${tradeIndex}">Additional Entry Price (USDT):</label>
+            <input type="number" id="additionalEntryPrice${tradeIndex}" name="additionalEntryPrice${tradeIndex}" required>
+        </div>
+        <div class="form-group">
+            <label for="additionalInvestment${tradeIndex}">Additional Investment (USDT):</label>
+            <input type="number" id="additionalInvestment${tradeIndex}" name="additionalInvestment${tradeIndex}" required>
+        </div>
+    `;
+    additionalTrades.appendChild(tradeDiv);
+
+    tradeDiv.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calculateLiquidationPrice);
+    });
+}
 
 function calculateLiquidationPrice() {
     const entryPrice = parseFloat(document.getElementById('entryPrice').value);
     const leverage = parseFloat(document.getElementById('leverage').value);
     const investment = parseFloat(document.getElementById('investment').value);
-    const additionalCheckbox = document.getElementById('additionalCheckbox').checked;
-    const additionalEntryPrice = additionalCheckbox ? parseFloat(document.getElementById('additionalEntryPrice').value) : 0;
-    const additionalInvestment = additionalCheckbox ? parseFloat(document.getElementById('additionalInvestment').value) : 0;
+    const positionType = document.getElementById('positionType').value;
+
+    const trades = [];
+    const additionalTrades = document.getElementById('additionalTrades');
+    for (let i = 0; i < additionalTrades.children.length; i++) {
+        const entryPrice = parseFloat(document.getElementById(`additionalEntryPrice${i}`).value);
+        const investment = parseFloat(document.getElementById(`additionalInvestment${i}`).value);
+        trades.push({ entryPrice, investment });
+    }
 
     const data = {
         entryPrice,
         leverage,
         investment,
-        additionalEntryPrice: additionalCheckbox ? additionalEntryPrice : null,
-        additionalInvestment: additionalCheckbox ? additionalInvestment : null
+        trades,
+        positionType
     };
 
     fetch('/calculate', {
@@ -37,7 +66,7 @@ function calculateLiquidationPrice() {
     })
     .then(response => response.json())
     .then(result => {
-        document.getElementById('result').innerText = `Your liquidation price is: ${result.liquidationPrice.toFixed(2)} USDT`;
+        document.getElementById('result').innerText = `Your liquidation price is : ${result.liquidationPrice.toFixed(2)} USDT`;
     })
     .catch(error => console.error('Error:', error));
 }

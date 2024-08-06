@@ -7,30 +7,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 app.post('/calculate', (req, res) => {
-    const { entryPrice, leverage, investment, additionalEntryPrice, additionalInvestment } = req.body;
-    let liquidationPrice;
-
-    if (additionalEntryPrice && additionalInvestment) {
-        liquidationPrice = calculateNewLiquidationPrice(entryPrice, leverage, investment, additionalEntryPrice, additionalInvestment);
-    } else {
-        liquidationPrice = calculateLiquidationPrice(entryPrice, leverage, investment);
-    }
-
+    const { entryPrice, leverage, investment, trades, positionType } = req.body;
+    const liquidationPrice = calculateLiquidationPrice(entryPrice, leverage, investment, trades, positionType);
     res.json({ liquidationPrice });
 });
 
-function calculateLiquidationPrice(entryPrice, leverage, investment) {
-    const maintenanceMargin = 0.005;
-    const initialMargin = entryPrice / leverage;
-    return entryPrice * (1 - (initialMargin - maintenanceMargin) / entryPrice);
-}
+function calculateLiquidationPrice(entryPrice, leverage, investment, trades, positionType) {
+    const maintenanceMargin = 0.005; // 0.5% 유지 마진 (거래소마다 다를 수 있음)
+    let totalInvestment = investment;
+    let totalEntryValue = entryPrice * investment;
 
-function calculateNewLiquidationPrice(entryPrice, leverage, investment, additionalEntryPrice, additionalInvestment) {
-    const totalInvestment = investment + additionalInvestment;
-    const weightedAverageEntryPrice = ((entryPrice * investment) + (additionalEntryPrice * additionalInvestment)) / totalInvestment;
-    const maintenanceMargin = 0.005;
-    const initialMargin = weightedAverageEntryPrice / leverage;
-    return weightedAverageEntryPrice * (1 - (initialMargin - maintenanceMargin) / weightedAverageEntryPrice);
+    trades.forEach(trade => {
+        totalInvestment += trade.investment;
+        totalEntryValue += trade.entryPrice * trade.investment;
+    });
+
+    const averageEntryPrice = totalEntryValue / totalInvestment;
+    const initialMargin = averageEntryPrice / leverage;
+    let liquidationPrice;
+
+    if (positionType === 'long') {
+        liquidationPrice = averageEntryPrice * (1 - (initialMargin - maintenanceMargin) / averageEntryPrice);
+    } else {
+        liquidationPrice = averageEntryPrice * (1 + (initialMargin - maintenanceMargin) / averageEntryPrice);
+    }
+
+    return liquidationPrice;
 }
 
 app.listen(port, () => {

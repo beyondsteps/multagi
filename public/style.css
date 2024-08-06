@@ -31,7 +31,7 @@ label {
     margin-bottom: 5px;
 }
 
-input {
+input, select {
     width: 100%;
     padding: 8px;
     box-sizing: border-box;
@@ -52,6 +52,13 @@ button:hover {
 
 #result {
     margin-top: 20px;
-    font-size: 1.5em;
+    font-size: 2.5em;
     color: #333;
+}
+
+.additional-trade {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
 }
