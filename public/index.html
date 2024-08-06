@@ -23,8 +23,18 @@
                 <input type="number" id="investment" name="investment" required>
             </div>
             <div class="form-group">
-                <label for="additionalInvestment">Additional Investment (USDT):</label>
-                <input type="number" id="additionalInvestment" name="additionalInvestment">
+                <input type="checkbox" id="additionalCheckbox" name="additionalCheckbox">
+                <label for="additionalCheckbox">Include Additional Investment</label>
+            </div>
+            <div id="additionalFields" style="display: none;">
+                <div class="form-group">
+                    <label for="additionalEntryPrice">Additional Entry Price (USDT):</label>
+                    <input type="number" id="additionalEntryPrice" name="additionalEntryPrice">
+                </div>
+                <div class="form-group">
+                    <label for="additionalInvestment">Additional Investment (USDT):</label>
+                    <input type="number" id="additionalInvestment" name="additionalInvestment">
+                </div>
             </div>
             <button type="submit">Calculate</button>
         </form>

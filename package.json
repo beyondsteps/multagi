@@ -1,15 +1,14 @@
 {
-  "name": "ls",
+  "name": "crypto-calculator",
   "version": "1.0.0",
-  "description": "This is Multagi project After 24.08.1~5 during crypto shock, I decided to make this website for the people like me (noob in crypto market) have fun",
+  "description": "Crypto liquidation price calculator",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "DE",
+  "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.17.1"
   }
 }
